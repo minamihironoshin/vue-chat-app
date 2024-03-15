@@ -3,7 +3,7 @@
     <div class="login-box">
       <v-card class="login-form">
         <v-card-title class="login-title">Login</v-card-title>
-        <v-card-subtitle>ユーザー情報をご入力ください</v-card-subtitle>
+        <v-card-subtitle>ユーザー情報をご記入ください</v-card-subtitle>
         <v-btn text color="light-blue" to="signup">新規登録はこちら</v-btn>
         <v-form
             ref="form"
