@@ -2,14 +2,20 @@
   <v-app>
     <div class="login-box">
       <v-card class="login-form">
-        <v-card-title class="login-title">Login</v-card-title>
-        <v-card-subtitle>ユーザー情報をご記入ください</v-card-subtitle>
-        <v-btn text color="light-blue" to="signup">新規登録はこちら</v-btn>
+        <v-card-title class="login-title">SignUp</v-card-title>
+        <v-card-subtitle>ユーザー情報をご入力ください</v-card-subtitle>
+        <v-btn text color="light-blue" to="login">ログイン画面はこちら</v-btn>
         <v-form
             ref="form"
             v-model="valid"
             lazy-validation
         >
+          <v-text-field
+              v-model="name"
+              :rules="nameRules"
+              label="UserName"
+              required
+          ></v-text-field>
 
           <v-text-field
               v-model="email"
@@ -30,22 +36,12 @@
               class="login-btn"
               @click="submit"
               :disabled="isValid">
-            ログイン
+            新規登録
           </v-btn>
 
           <v-btn>
             削除
           </v-btn>
-
-          <v-alert
-              dense
-              text
-              type="success"
-              class="success-message"
-              v-if="message"
-          >
-            {{ message }}
-          </v-alert>
 
           <v-alert
               dense
@@ -72,8 +68,8 @@ export default {
     valid: true,
     name: '',
     nameRules: [
-      v => !!v || 'Name is required',
-      v => (v && v.length <= 10) || 'Name must be less than 10 characters',
+      v => !!v || '名前を入力してください',
+      v => (v && v.length <= 10) || '名前は10文字以内で入力してください',
     ],
     email: '',
     emailRules: [
@@ -81,18 +77,10 @@ export default {
       v => /.+@.+\..+/.test(v) || 'メールアドレスが不正です',
     ],
     password: '',
-    message: '',
-    errorMessage: ''
+    errorMessage: ""
   }),
-  mounted() {
-    if (localStorage.message) {
-      this.message = localStorage.message
-      localStorage.message = ''
-    }
-  },
   computed: {
     isValid() {
-      console.log("isValid", this.valid);
       return !this.valid;
     }
   },
@@ -109,27 +97,26 @@ export default {
     submit() {
       console.log("submit call")
       firebase.auth()
-          .signInWithEmailAndPassword(this.email, this.password)
-          .then((result) => {
-            console.log("success")
-            console.log("user", result.user)
+          .createUserWithEmailAndPassword(this.email, this.password)
+          .then(async (result) => {
+            console.log("success", result)
+            await result.user.updateProfile(
+                {displayName: this.name}
+            );
+            console.log("update user", result.user)
 
-            const auth = {
-              displayName: result.user.displayName,
-              email: result.user.email,
-              uid: result.user.uid,
-              refreshToken: result.user.refreshToken,
-              photoURL: result.user.photoURL
-            }
+            localStorage.message = "新規作成に成功しました"
+            // TOPにリダイレクト
+            this.$router.push('/loginPage')
 
-            sessionStorage.setItem('user', JSON.stringify(auth))
-
-            this.$router.push('/')
           })
           .catch((error) => {
             console.log("fail", error)
-            this.errorMessage = "ログインに失敗しました"
+            //エラーメッセージを表示
+            this.errorMessage = "ユーザーの新規作成に失敗しました。";
+
           })
+
     }
   },
 }
@@ -153,10 +140,6 @@ export default {
 
 .login-btn {
   margin-right: 20px;
-}
-
-.success-message {
-  margin-top: 20px;
 }
 
 .error-message {

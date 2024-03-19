@@ -33,11 +33,25 @@
             <v-list-item-title>{{ text }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+
+        <v-list-item @click="logout">
+        <v-list-item-icon>
+          <v-icon>
+            mdi-logout
+          </v-icon>
+        </v-list-item-icon>
+
+        <v-list-item-content>
+          <v-list-item-title>ログアウト</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
       </v-list>
     </v-navigation-drawer>
 </template>
 
 <script>
+  import firebase from "@/firebase/firebase"
+
   export default {
     data: () => ({
       drawer: null,
@@ -48,5 +62,19 @@
         ['mdi-alert-octagon', 'Spam',"about/"],
       ],
     }),
+    methods:{
+      logout() {
+      console.log("logout call")
+      firebase.auth()
+          .signOut()
+          .then(() => {
+            localStorage.message = "ログアウトに成功しました"
+            this.$router.push('/loginPage')
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+    },
+    }
   }
 </script>
